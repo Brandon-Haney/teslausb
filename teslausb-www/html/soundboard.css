@@ -668,6 +668,11 @@
   background: #ddd;
 }
 
+.wf-canvas-wrap {
+  position: relative;
+  touch-action: none;
+}
+
 .wf-canvas {
   width: 100%;
   height: 80px;
@@ -675,6 +680,60 @@
   border-radius: 8px;
   background: #fafafa;
   touch-action: none;
+}
+
+.wf-trim-handle {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 2;
+  transform: translateX(-50%);
+}
+
+.wf-trim-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  background: #f9a825;
+  border-radius: 2px;
+}
+
+.wf-trim-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 20px;
+  background: #f9a825;
+  border-radius: 3px;
+}
+
+.wf-trim-start { left: 0; }
+.wf-trim-end { left: 100%; }
+
+.wf-trim-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  border-radius: 16px;
+  border: none;
+  background: #f9a825;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wf-trim-btn:active {
+  background: #f57f17;
+  transform: scale(0.95);
 }
 
 .wf-controls {

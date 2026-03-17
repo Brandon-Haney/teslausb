@@ -234,7 +234,7 @@ class Soundboard {
     grid.innerHTML = '<div class="sb-loading">Loading sounds...</div>';
 
     this.readfile({
-      url: `cgi-bin/soundinfo.sh?${this.rootPath}`,
+      url: `cgi-bin/soundinfo.sh?${this.rootPath}&_=${Date.now()}`,
       callback: (response) => {
         if (!response) {
           grid.innerHTML = '<div class="sb-empty"><div class="sb-empty-icon">\u26A0\uFE0F</div><div class="sb-empty-text">Could not load sounds</div></div>';
@@ -552,16 +552,46 @@ class Soundboard {
     document.body.appendChild(overlay);
     this.waveformOverlay = overlay;
 
-    const audioUrl = this.rootPath + '/' + encodeURIComponent(path);
+    const audioUrl = this.rootPath + '/' + encodeURIComponent(path) + '?t=' + Date.now();
     this.waveformPlayer = new WaveformPlayer(playerContainer, audioUrl, name);
 
     playerContainer.addEventListener('waveform-closed', () => this.closeWaveform());
+    playerContainer.addEventListener('waveform-trim', (e) => {
+      this.trimSound(path, e.detail.start, e.detail.end);
+    });
+  }
+
+  trimSound(path, start, end) {
+    this.closeWaveform();
+    this.showToast('Trimming audio...', true);
+    const encodedPath = encodeURIComponent(path);
+    const url = `cgi-bin/trim.sh?${this.rootPath}&${encodedPath}&${start}&${end}`;
+    this.readfile({
+      url: url,
+      callback: (response) => {
+        try {
+          const result = JSON.parse(response);
+          if (result.status === 'ok') {
+            this.showToast('Syncing to car...', true);
+            this.flushGadget(() => {
+              this.toastDone('Trimmed');
+              this.loadSounds();
+            });
+          } else {
+            this.toastDone(result.message || 'Trim failed');
+          }
+        } catch (e) {
+          this.toastDone('Trim failed');
+        }
+      }
+    });
   }
 
   closeWaveform() {
-    if (this.waveformPlayer) {
-      this.waveformPlayer.destroy();
-      this.waveformPlayer = null;
+    const player = this.waveformPlayer;
+    this.waveformPlayer = null;
+    if (player) {
+      player.destroy();
     }
     if (this.waveformOverlay) {
       this.waveformOverlay.remove();
