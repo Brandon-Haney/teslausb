@@ -15,6 +15,7 @@ class Soundboard {
 
     this.render();
     this.checkFFmpeg();
+    this.loadShuffleState();
     this.loadSounds();
   }
 
@@ -30,6 +31,11 @@ class Soundboard {
               <div class="sb-slot-size"></div>
             </div>
           </div>
+          <label class="sb-shuffle-toggle" title="Randomly pick a lock chime from sounds tagged 'Lock Chime' each drive session">
+            <input type="checkbox" id="sb-shuffle-check">
+            <span class="sb-shuffle-slider"></span>
+            <span class="sb-shuffle-label">Shuffle</span>
+          </label>
         </div>
         <div class="sb-toolbar" id="sb-toolbar">
           <div class="sb-toolbar-left">
@@ -155,6 +161,33 @@ class Soundboard {
         }
       }
     });
+  }
+
+  loadShuffleState() {
+    const checkbox = this.anchor.querySelector('#sb-shuffle-check');
+    this.readfile({
+      url: 'cgi-bin/shuffle-config.sh',
+      callback: (response) => {
+        try {
+          const data = JSON.parse(response);
+          checkbox.checked = data.enabled === true;
+        } catch (e) {
+          checkbox.checked = false;
+        }
+      }
+    });
+    checkbox.onchange = () => this.toggleShuffle(checkbox.checked);
+  }
+
+  toggleShuffle(enabled) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'cgi-bin/shuffle-config.sh');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = () => {
+      this.showToast(enabled ? 'Shuffle enabled' : 'Shuffle disabled');
+      this.hideToast(1500);
+    };
+    xhr.send(JSON.stringify({ enabled: enabled }));
   }
 
   assignToSlot(sound, slotType) {

@@ -118,6 +118,7 @@ function archive_is_reachable () {
 
 function connect_usb_drives_to_host() {
   log "Connecting usb to host..."
+  /root/bin/shuffle-lockchime.sh || true
   /root/bin/enable_gadget.sh
   log "Connected usb to host."
   sleep 5
@@ -779,6 +780,15 @@ function logrotator {
   done
 }
 
+function lockchimeshuffler {
+  echo -n chimeshuffler > /proc/self/comm
+  while true
+  do
+    sleep "${SHUFFLE_INTERVAL:-14400}"
+    /root/bin/shuffle-lockchime.sh --flush || true
+  done
+}
+
 function wifichecker {
   echo -n wifichecker > /proc/self/comm
   dmesg -w | {
@@ -848,6 +858,7 @@ then
 fi
 logrotator &
 wifichecker &
+lockchimeshuffler &
 
 fix_errors_in_images
 # always remove files that fsck recoverd

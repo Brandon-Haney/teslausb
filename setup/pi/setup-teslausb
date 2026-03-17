@@ -224,6 +224,7 @@ function get_common_scripts () {
   copy_script run/mountimage /root/bin
   copy_script run/enable_gadget.sh /root/bin
   copy_script run/disable_gadget.sh /root/bin
+  copy_script run/shuffle-lockchime.sh /root/bin
   ln -sf /root/bin/mountimage /sbin/mount.teslausb
 }
 

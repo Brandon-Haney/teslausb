@@ -345,8 +345,10 @@ class WaveformPlayer {
   }
 
   updateTime() {
+    const el = this.container.querySelector('.wf-current');
+    if (!el) return;
     if (!this.trimChanged) {
-      this.container.querySelector('.wf-current').textContent =
+      el.textContent =
         this.formatTime(this.audio.currentTime);
       if (this.audio.duration && !isNaN(this.audio.duration)) {
         this.container.querySelector('.wf-duration').textContent =
@@ -379,6 +381,8 @@ class WaveformPlayer {
   destroy() {
     this.stopAnimation();
     if (this.audio) {
+      this.audio.ontimeupdate = null;
+      this.audio.onended = null;
       this.audio.pause();
       this.audio.src = '';
     }
