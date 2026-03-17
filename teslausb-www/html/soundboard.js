@@ -41,7 +41,7 @@ class Soundboard {
           <div class="sb-toolbar-left">
             <button class="sb-toolbar-btn" id="sb-select-btn">Select</button>
             <button class="sb-toolbar-btn" id="sb-upload-btn">Upload</button>
-            <input type="file" id="sb-file-input" multiple accept=".wav,.mp3,.m4a,.flac,.ogg" style="display:none;">
+            <input type="file" id="sb-file-input" multiple accept=".wav,.mp3,.m4a,.flac,.ogg,.zip" style="display:none;">
           </div>
           <div class="sb-toolbar-right">
             <button class="sb-toolbar-btn" id="sb-import-btn">Import Pack</button>
@@ -741,6 +741,12 @@ class Soundboard {
   handleUpload(files) {
     if (!files || files.length === 0) return;
 
+    // Route ZIP files through pack import instead of raw upload
+    if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
+      this.importPack(files[0]);
+      return;
+    }
+
     const progressContainer = this.anchor.querySelector('#sb-upload-progress');
     const progressFill = this.anchor.querySelector('#sb-upload-fill');
     const progressText = this.anchor.querySelector('#sb-upload-text');
@@ -769,7 +775,6 @@ class Soundboard {
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', url);
-      xhr.setRequestHeader('Content-Length', file.size);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
