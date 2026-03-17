@@ -354,14 +354,17 @@
 
 /* Card checkbox for selection mode */
 .sb-card-checkbox {
+  grid-column: 3;
+  grid-row: 1;
   width: 22px;
   height: 22px;
   border: 2px solid #ccc;
   border-radius: 4px;
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
+  justify-self: center;
   transition: all 0.15s;
 }
 
@@ -397,14 +400,29 @@
   background: #fff;
   border-radius: 10px;
   padding: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 4px 8px;
   cursor: pointer;
   transition: all 0.15s;
   border: 2px solid transparent;
   position: relative;
   overflow: hidden;
+}
+
+.sb-card-play {
+  grid-row: 1 / 3;
+}
+
+.sb-card-info {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.sb-card-actions {
+  grid-column: 2 / 4;
+  grid-row: 2;
 }
 
 .sb-card:active {
@@ -442,7 +460,6 @@
 }
 
 .sb-card-info {
-  flex: 1;
   min-width: 0;
 }
 
@@ -501,13 +518,15 @@
 
 /* Favorite star */
 .sb-card-star {
+  grid-column: 3;
+  grid-row: 1;
   background: none;
   border: none;
   font-size: 20px;
   cursor: pointer;
   color: #ccc;
   padding: 0 4px;
-  flex-shrink: 0;
+  align-self: center;
   transition: color 0.15s, transform 0.15s;
 }
 
@@ -525,8 +544,8 @@
 
 .sb-card-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
-  flex-shrink: 0;
   align-items: center;
 }
 
