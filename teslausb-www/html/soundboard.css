@@ -914,8 +914,30 @@
   to { transform: rotate(360deg); }
 }
 
-/* Mobile: 1 column, hide actions row until tapped */
+/* Mobile: 1 column, larger text, hide actions until tapped */
 @media screen and (max-width: 599px) {
+  .sb-card {
+    padding: 14px 12px;
+  }
+
+  .sb-card-name {
+    font-size: 18px;
+  }
+
+  .sb-card-meta {
+    font-size: 14px;
+  }
+
+  .sb-card-play {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .sb-card-star {
+    font-size: 24px;
+  }
+
   .sb-card-actions {
     display: none;
   }
@@ -924,19 +946,17 @@
     display: flex;
   }
 
-  .sb-slot-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-  }
-
-  .sb-slot-name {
-    font-size: 13px;
+  .sb-grid {
+    gap: 10px;
   }
 
   .sb-catbtn {
-    padding: 5px 10px;
-    font-size: 12px;
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+
+  .sb-catcount {
+    font-size: 13px;
   }
 }
 
