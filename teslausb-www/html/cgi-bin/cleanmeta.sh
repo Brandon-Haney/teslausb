@@ -12,6 +12,16 @@ do
   urlargs[i]="$(echo -e "${val//%/\\x}")"
 done
 
+# Reject path traversal attempts
+for arg in "${urlargs[@]}"; do
+  case "$arg" in
+    *../*|*/../*|..*)
+      printf 'HTTP/1.0 403 Forbidden\r\nContent-type: text/plain\r\n\r\nForbidden\n'
+      exit 0
+      ;;
+  esac
+done
+
 cd "$DOCUMENT_ROOT/${urlargs[0]}" 2>/dev/null || cd "$DOCUMENT_ROOT/fs/Boombox" 2>/dev/null
 
 metafile="Boombox/.soundmeta.json"

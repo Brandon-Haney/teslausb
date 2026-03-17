@@ -18,4 +18,15 @@ shellcheck --exclude=SC1091 \
            ./run/remountfs_rw \
            ./run/send-push-message \
            ./run/temperature_monitor \
-           ./run/waitforidle
+           ./run/waitforidle \
+           ./run/shuffle-lockchime.sh \
+           ./teslausb-www/html/cgi-bin/check-ffmpeg.sh \
+           ./teslausb-www/html/cgi-bin/cleanmeta.sh \
+           ./teslausb-www/html/cgi-bin/convert.sh \
+           ./teslausb-www/html/cgi-bin/flush-gadget.sh \
+           ./teslausb-www/html/cgi-bin/rename.sh \
+           ./teslausb-www/html/cgi-bin/savemeta.sh \
+           ./teslausb-www/html/cgi-bin/shuffle-config.sh \
+           ./teslausb-www/html/cgi-bin/soundinfo.sh \
+           ./teslausb-www/html/cgi-bin/soundpack-import.sh \
+           ./teslausb-www/html/cgi-bin/trim.sh

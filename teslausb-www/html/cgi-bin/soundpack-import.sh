@@ -10,6 +10,16 @@ do
   urlargs[i]="$(echo -e "${val//%/\\x}")"
 done
 
+# Reject path traversal attempts
+for arg in "${urlargs[@]}"; do
+  case "$arg" in
+    *../*|*/../*|..*)
+      printf 'HTTP/1.0 403 Forbidden\r\nContent-type: text/plain\r\n\r\nForbidden\n'
+      exit 0
+      ;;
+  esac
+done
+
 cd "$DOCUMENT_ROOT/${urlargs[0]}" 2>/dev/null || exit 1
 
 destdir="${urlargs[1]:-Boombox}"
@@ -31,10 +41,9 @@ then
       case "$lower" in
         *.wav|*.mp3|*.m4a|*.flac|*.ogg)
           # Extract this file into the destination
-          unzip -o -j "$tmpfile" "$entry" -d "$destdir/" 2>/dev/null
-          if [ $? -eq 0 ]; then
-            basename=$(basename "$entry")
-            imported="${imported}\"${basename}\","
+          if unzip -o -j "$tmpfile" "$entry" -d "$destdir/" 2>/dev/null; then
+            bname=$(basename "$entry")
+            imported="${imported}\"${bname}\","
             ((count++))
           fi
           ;;

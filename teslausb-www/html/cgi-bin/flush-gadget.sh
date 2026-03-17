@@ -14,6 +14,16 @@ do
   urlargs[i]="$(echo -e "${val//%/\\x}")"
 done
 
+# Reject path traversal attempts
+for arg in "${urlargs[@]}"; do
+  case "$arg" in
+    *../*|*/../*|..*)
+      printf 'HTTP/1.0 403 Forbidden\r\nContent-type: text/plain\r\n\r\nForbidden\n'
+      exit 0
+      ;;
+  esac
+done
+
 disk_image="${urlargs[0]}"
 
 cat << 'HTTPEOF'

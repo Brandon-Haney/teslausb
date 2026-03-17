@@ -6,7 +6,7 @@ Content-type: application/json
 
 EOF
 
-if which ffmpeg > /dev/null 2>&1
+if command -v ffmpeg > /dev/null 2>&1
 then
   echo '{"available":true}'
 else

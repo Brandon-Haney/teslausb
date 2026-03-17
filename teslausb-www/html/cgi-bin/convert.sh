@@ -10,6 +10,16 @@ do
   urlargs[i]="$(echo -e "${val//%/\\x}")"
 done
 
+# Reject path traversal attempts
+for arg in "${urlargs[@]}"; do
+  case "$arg" in
+    *../*|*/../*|..*)
+      printf 'HTTP/1.0 403 Forbidden\r\nContent-type: text/plain\r\n\r\nForbidden\n'
+      exit 0
+      ;;
+  esac
+done
+
 cd "$DOCUMENT_ROOT/${urlargs[0]}" 2>/dev/null || exit 1
 
 source="${urlargs[1]}"
@@ -26,7 +36,7 @@ EOF
 fi
 
 # Check ffmpeg is available
-if ! which ffmpeg > /dev/null 2>&1; then
+if ! command -v ffmpeg > /dev/null 2>&1; then
   cat << EOF
 HTTP/1.0 500 Internal Server Error
 Content-type: application/json
