@@ -499,6 +499,30 @@
 .sb-card-badge.ogg { background: #fff3e0; color: #e65100; }
 .sb-card-badge.m4a { background: #f3e5f5; color: #7b1fa2; }
 
+/* Favorite star */
+.sb-card-star {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ccc;
+  padding: 0 4px;
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.sb-card-star:active {
+  transform: scale(1.2);
+}
+
+.sb-card.sb-favorite .sb-card-star {
+  color: #f9a825;
+}
+
+.sb-card.sb-favorite {
+  border-left: 3px solid #f9a825;
+}
+
 .sb-card-actions {
   display: flex;
   gap: 6px;

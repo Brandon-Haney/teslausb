@@ -41,18 +41,23 @@ if [ -f "Boombox/LockChime.wav" ]; then
   lockchime_md5=$(md5sum "Boombox/LockChime.wav" 2>/dev/null | cut -d' ' -f1)
 fi
 
-# Read user-assigned category metadata
+# Read user-assigned category and favorite metadata
 declare -A soundmeta
+declare -A soundfav
 if [ -f "Boombox/.soundmeta.json" ]; then
-  while IFS='=' read -r key val; do
-    soundmeta["$key"]="$val"
+  while IFS=$'\t' read -r key cat fav; do
+    soundmeta["$key"]="$cat"
+    soundfav["$key"]="$fav"
   done < <(python3 -c "
 import json
 try:
     with open('Boombox/.soundmeta.json') as f:
         data = json.load(f)
     for k, v in data.items():
-        print(f'{k}={v}')
+        if isinstance(v, dict):
+            print(f'{k}\t{v.get(\"category\",\"\")}\t{\"true\" if v.get(\"favorite\") else \"false\"}')
+        else:
+            print(f'{k}\t{v}\tfalse')
 except:
     pass
 " 2>/dev/null)
@@ -94,11 +99,12 @@ while read -r filepath; do
   escaped_path=$(echo "$relpath" | sed 's/\\/\\\\/g; s/"/\\"/g')
   escaped_dir=$(echo "$dirpart" | sed 's/\\/\\\\/g; s/"/\\"/g')
 
-  # Look up user-assigned category
+  # Look up user-assigned category and favorite
   user_cat="${soundmeta[$relpath]:-}"
+  user_fav="${soundfav[$relpath]:-false}"
 
-  printf '    {"name":"%s","path":"%s","dir":"%s","size":%s,"ext":"%s","md5":"%s","category":"%s"}' \
-    "$escaped_name" "$escaped_path" "$escaped_dir" "$filesize" "$ext_lower" "$file_md5" "$user_cat"
+  printf '    {"name":"%s","path":"%s","dir":"%s","size":%s,"ext":"%s","md5":"%s","category":"%s","favorite":%s}' \
+    "$escaped_name" "$escaped_path" "$escaped_dir" "$filesize" "$ext_lower" "$file_md5" "$user_cat" "$user_fav"
 done < <(find Boombox -maxdepth 3 -type f \( -iname "*.wav" -o -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.flac" -o -iname "*.ogg" \) 2>/dev/null | LC_ALL=C sort -f)
 
 echo ""

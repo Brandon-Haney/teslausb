@@ -310,7 +310,7 @@ class Soundboard {
         const saveNext = (i) => {
           if (i >= toSave.length) return;
           const { sound, cat } = toSave[i];
-          const body = JSON.stringify({ path: sound.path, category: cat });
+          const body = JSON.stringify({ path: sound.path, category: cat, favorite: sound.favorite || false });
           const xhr = new XMLHttpRequest();
           xhr.open('POST', `cgi-bin/savemeta.sh?${this.rootPath}`);
           xhr.setRequestHeader('Content-Type', 'application/json');
@@ -465,6 +465,9 @@ class Soundboard {
       return cat === this.activeCategory;
     });
 
+    // Pin favorites to the top
+    filtered.sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
+
     if (filtered.length === 0) {
       grid.innerHTML = `
         <div class="sb-empty" id="sb-empty-state">
@@ -492,6 +495,7 @@ class Soundboard {
     const isActive = this.lockchimeMd5 && sound.md5 === this.lockchimeMd5 &&
                      sound.name.toLowerCase() !== 'lockchime.wav';
     if (isActive) card.classList.add('is-active-chime');
+    if (sound.favorite) card.classList.add('sb-favorite');
 
     const isLockEligible = sound.name.toLowerCase() !== 'lockchime.wav' &&
                            ((sound.ext === 'wav' && sound.size <= 1048576) || this.hasFFmpeg);
@@ -512,6 +516,7 @@ class Soundboard {
         </div>
       </div>
       <div class="sb-card-actions">
+        ${!this.selectMode ? `<button class="sb-card-star" title="Favorite">${sound.favorite ? '\u2605' : '\u2606'}</button>` : ''}
         ${!this.selectMode ? `<select class="sb-card-category" title="Assign category">
           ${Object.keys(catLabels).map(k =>
             `<option value="${k}"${currentCat === k ? ' selected' : ''}>${catLabels[k]}</option>`
@@ -555,6 +560,15 @@ class Soundboard {
       catSelect.onchange = (e) => {
         e.stopPropagation();
         this.saveCategory(sound, catSelect.value);
+      };
+    }
+
+    // Star/favorite button
+    const starBtn = card.querySelector('.sb-card-star');
+    if (starBtn) {
+      starBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.toggleFavorite(sound);
       };
     }
 
@@ -995,7 +1009,7 @@ class Soundboard {
   }
 
   saveCategory(sound, category) {
-    const body = JSON.stringify({ path: sound.path, category: category });
+    const body = JSON.stringify({ path: sound.path, category: category, favorite: sound.favorite || false });
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `cgi-bin/savemeta.sh?${this.rootPath}`);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -1008,6 +1022,27 @@ class Soundboard {
     };
     xhr.onerror = () => {
       this.showToast('Failed to save category', false);
+      this.hideToast(1500);
+    };
+    xhr.send(body);
+  }
+
+  toggleFavorite(sound) {
+    const newFav = !sound.favorite;
+    const body = JSON.stringify({
+      path: sound.path,
+      category: sound.category || this.categorize(sound),
+      favorite: newFav
+    });
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `cgi-bin/savemeta.sh?${this.rootPath}`);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = () => {
+      sound.favorite = newFav;
+      this.renderGrid();
+    };
+    xhr.onerror = () => {
+      this.showToast('Failed to save favorite', false);
       this.hideToast(1500);
     };
     xhr.send(body);
