@@ -40,7 +40,7 @@ then
       lower=$(echo "$entry" | tr '[:upper:]' '[:lower:]')
       case "$lower" in
         *.wav|*.mp3|*.m4a|*.flac|*.ogg)
-          # Extract this file into the destination
+          # Extract this file into the destination (flatten directories)
           if unzip -o -j "$tmpfile" "$entry" -d "$destdir/" 2>/dev/null; then
             bname=$(basename "$entry")
             imported="${imported}\"${bname}\","
@@ -48,7 +48,7 @@ then
           fi
           ;;
       esac
-    done < <(unzip -l "$tmpfile" 2>/dev/null | awk 'NR>3 && NF>=4 {print $NF}')
+    done < <(unzip -Z1 "$tmpfile" 2>/dev/null)
 
     rm -f "$tmpfile"
 
