@@ -991,19 +991,12 @@
   }
 }
 
-/* Tablet: 2 columns */
+/* Tablet and up: 2 columns */
 @media screen and (min-width: 600px) {
   .sb-grid {
     grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Desktop: 3 columns */
-@media screen and (min-width: 824px) {
-  .sb-grid {
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    padding: 12px;
+    gap: 10px;
+    padding: 10px;
   }
 
   .sb-card {
@@ -1019,9 +1012,11 @@
   }
 }
 
-/* Large desktop: 4 columns */
+/* Large desktop: 3 columns */
 @media screen and (min-width: 1200px) {
   .sb-grid {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
   }
 }
