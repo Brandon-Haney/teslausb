@@ -505,17 +505,19 @@ class Soundboard {
     const catLabels = { lock: 'Lock Chime', horn: 'Horn', sentry: 'Sentry', fun: 'Custom' };
 
     card.innerHTML = `
-      <button class="sb-card-play">\u25B6</button>
-      <div class="sb-card-info">
-        <div class="sb-card-name">${this.escapeHtml(sound.name)}</div>
-        <div class="sb-card-meta">
-          <span class="sb-card-badge ${sound.ext}">${sound.ext}</span>
-          ${this.formatSize(sound.size)}
-          ${sound.dir ? ' \u2022 ' + this.escapeHtml(sound.dir) : ''}
+      <div class="sb-card-row-top">
+        <button class="sb-card-play">\u25B6</button>
+        <div class="sb-card-info">
+          <div class="sb-card-name">${this.escapeHtml(sound.name)}</div>
+          <div class="sb-card-meta">
+            <span class="sb-card-badge ${sound.ext}">${sound.ext}</span>
+            ${this.formatSize(sound.size)}
+            ${sound.dir ? ' \u2022 ' + this.escapeHtml(sound.dir) : ''}
+          </div>
         </div>
+        ${this.selectMode ? `<div class="sb-card-checkbox ${isSelected ? 'checked' : ''}"></div>` :
+          `<button class="sb-card-star" title="Favorite">${sound.favorite ? '\u2605' : '\u2606'}</button>`}
       </div>
-      ${this.selectMode ? `<div class="sb-card-checkbox ${isSelected ? 'checked' : ''}"></div>` :
-        `<button class="sb-card-star" title="Favorite">${sound.favorite ? '\u2605' : '\u2606'}</button>`}
       <div class="sb-card-actions">
         ${!this.selectMode ? `<select class="sb-card-category" title="Assign category">
           ${Object.keys(catLabels).map(k =>
