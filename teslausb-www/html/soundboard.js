@@ -194,11 +194,11 @@ class Soundboard {
     if (slotType === 'lockchime') {
       if (sound.ext === 'wav' && sound.size <= 1048576) {
         this.setLockChime(sound);
-      } else if (this.hasFFmpeg && sound.ext !== 'wav') {
+      } else if (this.hasFFmpeg) {
+        // Handles both non-WAV files and WAV files over 1MB
         this.convertAndAssign(sound);
       } else {
-        alert('Lock chime must be a .wav file under 1MB.' +
-              (this.hasFFmpeg ? '' : ' Install ffmpeg for auto-conversion.'));
+        alert('Lock chime must be a .wav file under 1MB. Install ffmpeg for auto-conversion.');
       }
     }
   }
@@ -209,7 +209,9 @@ class Soundboard {
     const progressText = this.anchor.querySelector('#sb-upload-text');
 
     progressContainer.classList.add('active');
-    progressText.textContent = `Converting ${sound.name} to WAV...`;
+    progressText.textContent = sound.ext === 'wav'
+      ? `Compressing ${sound.name} for lock chime...`
+      : `Converting ${sound.name} to WAV...`;
     progressFill.style.width = '50%';
 
     const sourcePath = encodeURIComponent('Boombox/' + sound.path);
@@ -277,12 +279,49 @@ class Soundboard {
           const data = JSON.parse(response);
           this.lockchimeMd5 = data.lockchime_md5 || '';
           this.sounds = data.sounds || [];
+          this.persistAutoCategories();
           this.renderCategories();
           this.renderGrid();
           this.renderActiveSlot();
         } catch (e) {
           grid.innerHTML = '<div class="sb-empty"><div class="sb-empty-icon">\u26A0\uFE0F</div><div class="sb-empty-text">Error parsing sound data</div></div>';
         }
+      }
+    });
+  }
+
+  persistAutoCategories() {
+    // Build list of sounds needing category saves
+    const toSave = [];
+    for (const sound of this.sounds) {
+      if (sound.name.toLowerCase() === 'lockchime.wav') continue;
+      if (sound.category && sound.category !== '') continue;
+      const cat = this.categorize(sound);
+      if (cat && cat !== 'active') {
+        toSave.push({ sound, cat });
+      }
+    }
+    if (toSave.length === 0) return;
+
+    // Clean stale entries, then save categories one at a time to avoid races
+    this.readfile({
+      url: `cgi-bin/cleanmeta.sh?${this.rootPath}`,
+      callback: () => {
+        const saveNext = (i) => {
+          if (i >= toSave.length) return;
+          const { sound, cat } = toSave[i];
+          const body = JSON.stringify({ path: sound.path, category: cat });
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', `cgi-bin/savemeta.sh?${this.rootPath}`);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.onload = () => {
+            sound.category = cat;
+            saveNext(i + 1);
+          };
+          xhr.onerror = () => saveNext(i + 1);
+          xhr.send(body);
+        };
+        saveNext(0);
       }
     });
   }
@@ -454,8 +493,8 @@ class Soundboard {
                      sound.name.toLowerCase() !== 'lockchime.wav';
     if (isActive) card.classList.add('is-active-chime');
 
-    const isLockEligible = sound.ext === 'wav' && sound.size <= 1048576 &&
-                           sound.name.toLowerCase() !== 'lockchime.wav';
+    const isLockEligible = sound.name.toLowerCase() !== 'lockchime.wav' &&
+                           ((sound.ext === 'wav' && sound.size <= 1048576) || this.hasFFmpeg);
 
     const isSelected = this.selectedSounds.has(sound.path);
     const currentCat = this.categorize(sound);
@@ -553,7 +592,7 @@ class Soundboard {
     if (assignBtn && !isActive) {
       assignBtn.onclick = (e) => {
         e.stopPropagation();
-        this.setLockChime(sound);
+        this.assignToSlot(sound, 'lockchime');
       };
     }
 
@@ -672,14 +711,12 @@ class Soundboard {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url);
     xhr.onload = () => {
-      // Build a sound object for assignToSlot
+      // assignToSlot handles all cases: direct copy, conversion, compression
       const sound = { name: file.name, path: file.name, ext: ext, size: file.size, dir: '', md5: '' };
-      if (ext === 'wav' && file.size <= 1048576) {
+      if ((ext === 'wav' && file.size <= 1048576) || this.hasFFmpeg) {
         this.assignToSlot(sound, 'lockchime');
-      } else if (this.hasFFmpeg && ext !== 'wav') {
-        this.convertAndAssign(sound);
       } else {
-        this.toastDone('Uploaded (not eligible as lock chime)');
+        this.toastDone('Uploaded (needs ffmpeg to convert)');
         this.loadSounds();
       }
     };

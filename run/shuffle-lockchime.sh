@@ -17,9 +17,9 @@ fi
 # Access boombox via autofs mount
 cd "$BOOMBOX_MOUNT" 2>/dev/null || exit 0
 
-# Get list of lock chime candidates using the same logic as the UI:
-# 1. Files explicitly tagged as "lock" in .soundmeta.json
-# 2. WAV files under 1MB that aren't tagged as something else
+# Get lock chime candidates (matches UI auto-categorization logic):
+# - Files explicitly tagged "lock" in .soundmeta.json
+# - WAV files under 1MB with no category (auto-detected as lock eligible)
 candidates=$(python3 -c "
 import json, os
 meta = {}

@@ -42,17 +42,26 @@ nameonly="${basename%.*}"
 dirpart=$(dirname "$source")
 dest="${dirpart}/${nameonly}.wav"
 
-# Don't overwrite if dest already exists with same name
-if [ -f "$dest" ] && [ "$source" != "$dest" ]; then
+# If source is already a WAV, write compressed version to a temp name
+# so we don't overwrite the original
+if [ "$source" = "$dest" ]; then
+  dest="${dirpart}/${nameonly}_compressed.wav"
+elif [ -f "$dest" ]; then
   dest="${dirpart}/${nameonly}_converted.wav"
 fi
 
-# Convert to Tesla lock chime format: 16-bit PCM WAV, 44.1kHz, mono
-# Limit duration to ~22 seconds to stay under 1MB
+# Convert to Tesla lock chime format: 16-bit PCM WAV, mono
+# Try 44.1kHz first; if over 1MB, retry at 22.05kHz for more compression
 tmpfile=$(mktemp /tmp/convert.XXXXXX.wav)
-if ffmpeg -y -i "$source" -acodec pcm_s16le -ar 44100 -ac 1 -t 22 "$tmpfile" 2>/tmp/ffmpeg_out.txt
+if ffmpeg -y -i "$source" -acodec pcm_s16le -ar 44100 -ac 1 "$tmpfile" 2>/tmp/ffmpeg_out.txt
 then
   outsize=$(stat -c%s "$tmpfile" 2>/dev/null || echo 0)
+
+  # If over 1MB at 44.1kHz, retry at 22.05kHz (halves file size)
+  if [ "$outsize" -gt 1048576 ]; then
+    ffmpeg -y -i "$source" -acodec pcm_s16le -ar 22050 -ac 1 "$tmpfile" 2>/tmp/ffmpeg_out.txt
+    outsize=$(stat -c%s "$tmpfile" 2>/dev/null || echo 0)
+  fi
 
   # If still over 1MB, reject
   if [ "$outsize" -gt 1048576 ]; then
@@ -61,7 +70,7 @@ then
 HTTP/1.0 200 OK
 Content-type: application/json
 
-{"status":"error","message":"Converted file exceeds 1MB limit"}
+{"status":"error","message":"File too long for lock chime (over 1MB even at 22kHz)"}
 EOF
     exit 0
   fi
