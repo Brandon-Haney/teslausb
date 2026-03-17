@@ -61,6 +61,7 @@ lun=0
 
 if [ -e "/backingfiles/cam_disk.bin" ]
 then
+  echo 1 > "$gadget_root/functions/mass_storage.0/lun.${lun}/removable"
   echo "/backingfiles/cam_disk.bin" > "$gadget_root/functions/mass_storage.0/lun.${lun}/file"
   echo "TeslaUSB CAM $(du -h /backingfiles/cam_disk.bin | awk '{print $1}')" > "$gadget_root/functions/mass_storage.0/lun.${lun}/inquiry_string"
   ((++lun))
@@ -69,6 +70,7 @@ fi
 if [ -e "/backingfiles/music_disk.bin" ]
 then
   mkdir -p "$gadget_root/functions/mass_storage.0/lun.${lun}"
+  echo 1 > "$gadget_root/functions/mass_storage.0/lun.${lun}/removable"
   echo "/backingfiles/music_disk.bin" > "$gadget_root/functions/mass_storage.0/lun.${lun}/file"
   echo "TeslaUSB MUSIC $(du -h /backingfiles/music_disk.bin | awk '{print $1}')" > "$gadget_root/functions/mass_storage.0/lun.${lun}/inquiry_string"
   ((++lun))
@@ -77,6 +79,7 @@ fi
 if [ -e "/backingfiles/lightshow_disk.bin" ]
 then
   mkdir -p "$gadget_root/functions/mass_storage.0/lun.${lun}"
+  echo 1 > "$gadget_root/functions/mass_storage.0/lun.${lun}/removable"
   echo "/backingfiles/lightshow_disk.bin" > "$gadget_root/functions/mass_storage.0/lun.${lun}/file"
   echo "TeslaUSB LIGHTSHOW $(du -h /backingfiles/lightshow_disk.bin | awk '{print $1}')" > "$gadget_root/functions/mass_storage.0/lun.${lun}/inquiry_string"
   ((++lun))
@@ -85,6 +88,7 @@ fi
 if [ -e "/backingfiles/boombox_disk.bin" ]
 then
   mkdir -p "$gadget_root/functions/mass_storage.0/lun.${lun}"
+  echo 1 > "$gadget_root/functions/mass_storage.0/lun.${lun}/removable"
   echo "/backingfiles/boombox_disk.bin" > "$gadget_root/functions/mass_storage.0/lun.${lun}/file"
   echo "TeslaUSB BOOMBOX $(du -h /backingfiles/boombox_disk.bin | awk '{print $1}')" > "$gadget_root/functions/mass_storage.0/lun.${lun}/inquiry_string"
   ((++lun))

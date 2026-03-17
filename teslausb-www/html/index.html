@@ -11,8 +11,11 @@
 <link rel="shortcut icon" href="/icons/favicon.ico">
 <link rel="stylesheet" href="filebrowser.css">
 <link rel="stylesheet" href="contextmenu.css">
+<link rel="stylesheet" href="soundboard.css">
 <script src="contextmenu.js"></script>
 <script src="filebrowser.js"></script>
+<script src="waveform.js"></script>
+<script src="soundboard.js"></script>
 <meta name="msapplication-TileColor" content="#00aba9">
 <meta name="msapplication-config" content="/icons/browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
@@ -932,7 +935,14 @@ video {
   </div>
 
   <div class="tab content6">
-    <div id="filebrowser" style="width:100%;height:calc(100% - 4px);">
+    <div id="boombox-viewswitch" style="display:none;">
+      <div class="sb-viewtoggle">
+        <button class="sb-viewbtn active" id="sb-view-soundboard">Soundboard</button>
+        <button class="sb-viewbtn" id="sb-view-filebrowser">File Browser</button>
+      </div>
+    </div>
+    <div id="soundboard" style="width:100%;height:calc(100% - 40px);"></div>
+    <div id="filebrowser" style="width:100%;height:calc(100% - 40px);display:none;">
     </div>
   </div>
 
@@ -1808,11 +1818,50 @@ function readconfig() {
       filestab.style.display = "inline-block";
 
       const fb = document.querySelector("#filebrowser");
-      new FileBrowser(fb, [
+      const fbDrives = [
         ...config.has_music == "yes" ? [{ path: "fs/Music", label: "Music" }] : [],
         ...config.has_lightshow == "yes" ? [{ path: "fs/LightShow", label: "LightShow" }] : [],
         ...config.has_boombox == "yes" ? [{ path: "fs/Boombox", label: "Boombox" }] : []
-      ]);
+      ];
+
+      if (config.has_boombox == "yes") {
+        // Show soundboard view by default for Boombox
+        const viewSwitch = document.querySelector("#boombox-viewswitch");
+        const sbContainer = document.querySelector("#soundboard");
+        const sbViewBtn = document.querySelector("#sb-view-soundboard");
+        const fbViewBtn = document.querySelector("#sb-view-filebrowser");
+        viewSwitch.style.display = "block";
+
+        new Soundboard(sbContainer, "fs/Boombox");
+
+        var fbInstance = null;
+        sbViewBtn.onclick = function() {
+          sbViewBtn.classList.add("active");
+          fbViewBtn.classList.remove("active");
+          sbContainer.style.display = "block";
+          fb.style.display = "none";
+        };
+        fbViewBtn.onclick = function() {
+          fbViewBtn.classList.add("active");
+          sbViewBtn.classList.remove("active");
+          fb.style.display = "block";
+          sbContainer.style.display = "none";
+          // Lazy-init FileBrowser on first switch
+          if (!fbInstance) {
+            fbInstance = new FileBrowser(fb, fbDrives);
+          }
+        };
+
+        // If there are other drives besides boombox, also init FileBrowser
+        if (fbDrives.length > 1) {
+          fbInstance = new FileBrowser(fb, fbDrives);
+        }
+      } else {
+        // No boombox, just show FileBrowser as before
+        fb.style.display = "block";
+        document.querySelector("#soundboard").style.display = "none";
+        new FileBrowser(fb, fbDrives);
+      }
     }
     if (config.has_cam == "yes") {
       const recordingstab = document.querySelector(".tablabel5");
