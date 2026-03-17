@@ -914,40 +914,66 @@
   to { transform: rotate(360deg); }
 }
 
-/* Mobile: 1 column, larger text, hide actions until tapped */
+/* Mobile: 1 column, large touch targets, ~10 items visible */
 @media screen and (max-width: 599px) {
   .sb-card {
-    padding: 14px 12px;
+    padding: 16px 14px;
+    min-height: 56px;
+    border-radius: 12px;
+  }
+
+  .sb-card-row-top {
+    gap: 12px;
   }
 
   .sb-card-name {
-    font-size: 18px;
+    font-size: 17px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .sb-card-meta {
-    font-size: 14px;
+    font-size: 13px;
+    margin-top: 3px;
+  }
+
+  .sb-card-badge {
+    font-size: 11px;
+    padding: 2px 7px;
   }
 
   .sb-card-play {
-    width: 44px;
-    height: 44px;
-    font-size: 18px;
+    width: 42px;
+    height: 42px;
+    font-size: 17px;
   }
 
   .sb-card-star {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .sb-card-actions {
     display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
   }
 
   .sb-card.sb-expanded .sb-card-actions {
     display: flex;
   }
 
+  .sb-card-actions .sb-card-category,
+  .sb-card-actions .sb-card-convert,
+  .sb-card-actions .sb-card-assign {
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+
   .sb-grid {
-    gap: 10px;
+    gap: 6px;
+    padding: 6px;
   }
 
   .sb-catbtn {
@@ -956,7 +982,12 @@
   }
 
   .sb-catcount {
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .sb-toolbar-btn {
+    font-size: 14px;
+    padding: 8px 12px;
   }
 }
 
