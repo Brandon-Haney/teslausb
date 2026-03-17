@@ -170,6 +170,22 @@ class FileBrowser {
     this.log("could not find empty new folder name");
   }
 
+  // Map autofs mount paths to their backing disk images for gadget flush
+  static BACKING_FILES = {
+    'fs/Music': '/backingfiles/music_disk.bin',
+    'fs/LightShow': '/backingfiles/lightshow_disk.bin',
+    'fs/Boombox': '/backingfiles/boombox_disk.bin'
+  };
+
+  flushGadget(callback) {
+    const diskImage = FileBrowser.BACKING_FILES[this.root_path];
+    if (diskImage) {
+      this.readfile({url: `cgi-bin/flush-gadget.sh?${diskImage}`, callback: () => { if (callback) callback(); }});
+    } else if (callback) {
+      callback();
+    }
+  }
+
   deleteItems(items) {
     var pathsList = "";
     items.forEach((item) => {
@@ -181,7 +197,7 @@ class FileBrowser {
       {url:`cgi-bin/rm.sh?${this.root_path}${pathsList}`,
       callback:(response, data) => {
         this.log(response);
-        this.refreshLists();
+        this.flushGadget(() => this.refreshLists());
       }
       });
   }
@@ -227,7 +243,7 @@ class FileBrowser {
       {url:`cgi-bin/mv.sh?${this.root_path}/${this.current_path}&${encodeURIComponent(oldname)}&${encodeURIComponent(newname)}`,
       callback:(response, data) => {
         this.log(response);
-        this.refreshLists();
+        this.flushGadget(() => this.refreshLists());
       }
       });
   }
@@ -271,7 +287,7 @@ class FileBrowser {
       {url:`cgi-bin/cp.sh?${this.root_path}&${encodeURIComponent(item.dataset.fullpath)}&LockChime.wav`,
       callback:(response, data) => {
         this.log(response);
-        this.refreshLists();
+        this.flushGadget(() => this.refreshLists());
       }
       });
   }
@@ -940,7 +956,7 @@ class FileBrowser {
       {url:`cgi-bin/mv.sh?${this.root_path}${pathString}&${this.stringDecode(ev.target.dataset.fullpath)}`,
       callback:(response, data) => {
         this.log(response);
-        this.refreshLists();
+        this.flushGadget(() => this.refreshLists());
       }
       });
 
@@ -999,7 +1015,7 @@ class FileBrowser {
   hideDropInfo() {
     var di = this.anchor_elem.querySelector(".fb-dropinfo-holder");
     di.style.visibility = "hidden";
-    this.refreshLists();
+    this.flushGadget(() => this.refreshLists());
   }
 
   async getFilePromise(entry) {

@@ -10,7 +10,14 @@ do
   urlargs[i]="$(echo -e "${val//%/\\x}")"
 done
 
-cd "$DOCUMENT_ROOT/${urlargs[0]}" 2>/dev/null || cd "$DOCUMENT_ROOT/fs/Boombox" 2>/dev/null
+# Refresh the filesystem cache so we see changes made by the USB host.
+# Find the loop device for the boombox disk image and flush its buffers.
+loop_dev=$(losetup -j /backingfiles/boombox_disk.bin 2>/dev/null | head -1 | cut -d: -f1)
+if [ -n "$loop_dev" ] && [ -b "$loop_dev" ]; then
+  sudo blockdev --flushbufs "$loop_dev" 2>/dev/null || true
+fi
+
+cd "$DOCUMENT_ROOT/${urlargs[0]}" 2>/dev/null || cd "$boombox_mount" 2>/dev/null
 
 cat << 'HTTPEOF'
 HTTP/1.0 200 OK

@@ -19,6 +19,7 @@ Content-type: text/plain
 EOF
 if rm -r "${urlargs[@]:1}"  &> /dev/null
 then
+  sync
   echo OK
 else
   echo FAILED
