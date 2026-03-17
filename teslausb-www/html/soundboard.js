@@ -594,6 +594,14 @@ class Soundboard {
         this.updateToolbar();
       };
       if (isSelected) card.classList.add('sb-selected');
+    } else {
+      // Tap card to expand/collapse actions on mobile
+      card.onclick = () => {
+        const wasExpanded = card.classList.contains('sb-expanded');
+        // Collapse any other expanded card
+        this.anchor.querySelectorAll('.sb-card.sb-expanded').forEach(c => c.classList.remove('sb-expanded'));
+        if (!wasExpanded) card.classList.add('sb-expanded');
+      };
     }
 
     // Play button

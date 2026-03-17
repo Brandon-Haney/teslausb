@@ -914,16 +914,14 @@
   to { transform: rotate(360deg); }
 }
 
-/* Small mobile: compact layout */
-@media screen and (max-width: 379px) {
-  .sb-card-play {
-    width: 34px;
-    height: 34px;
-    font-size: 14px;
+/* Mobile: 1 column, hide actions row until tapped */
+@media screen and (max-width: 599px) {
+  .sb-card-actions {
+    display: none;
   }
 
-  .sb-card-name {
-    font-size: 13px;
+  .sb-card.sb-expanded .sb-card-actions {
+    display: flex;
   }
 
   .sb-slot-icon {
@@ -943,7 +941,7 @@
 }
 
 /* Tablet: 2 columns */
-@media screen and (min-width: 480px) {
+@media screen and (min-width: 600px) {
   .sb-grid {
     grid-template-columns: 1fr 1fr;
   }
